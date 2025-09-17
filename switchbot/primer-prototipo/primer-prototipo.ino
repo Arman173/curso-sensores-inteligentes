@@ -3,7 +3,7 @@
 */
 #include <ESP32Servo.h>
 
-#define btn0   13   // pin del boton para el switch manual
+#define btn0   26   // pin del boton para el switch manual
 #define SmPin  12   // pin para controlar el servomotor
 #define pRed   14
 #define pGreen 27
@@ -20,10 +20,10 @@ void setup() {
   
   servoMotor.attach(SmPin); // configuramos el pin de control al servo
 
-  servoMotor.write(0);
-  delay(1000);
-  servoMotor.write(150);
-  delay(1000);
+  // servoMotor.write(0);
+  // delay(1000);
+  // servoMotor.write(150);
+  // delay(1000);
 }
 
 bool state;
