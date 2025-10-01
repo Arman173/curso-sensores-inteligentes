@@ -10,7 +10,9 @@
 #define pinR  6 // pin del led rojo
 #define pinG  7 // pin del led verde
 #define pinB  8 // pin del led azul
+#define pinEna   3 // pin para habilitar la alimentacion del servo
 #define pinSm 4 // pin para la señal pwm del servo
+#define TIME_TO_SLEEP 5000
 
 /**** OBJETOS A USAR ****/
 Servo servoMotor;
@@ -21,6 +23,9 @@ const int ANGLE_1 = 0;
 const int ANGLE_2 = 180;
 int ANGLE_ON  = ANGLE_1;
 int ANGLE_OFF = ANGLE_2;
+int counter = 0;
+bool sleep_mode = false;
+
 /**** FUNCIONES A USAR ****/
 void parpadeo(int pin, int times = 3, int millis = 500) {
   for (int i = 0; i < times; i++) {
@@ -36,6 +41,7 @@ void configurarSwitchbot() {
   pinMode(pinR, OUTPUT); // los led son salidas
   pinMode(pinG, OUTPUT);
   pinMode(pinB, OUTPUT);
+  pinMode(pinEna, OUTPUT);
   servoMotor.attach(pinSm); // pinSm como salida pwm para el servo
 }
 void cambiarOrientacion() {
@@ -50,6 +56,16 @@ void cambiarOrientacion() {
   parpadeo(pinB, 3, 250);
 }
 void cambiarEstado(bool new_state) {
+  // nos aseguramos de que no este en sleep mode
+  // en caso contrario, lo desactivamos
+  counter = 0;
+  if (sleep_mode) {
+    digitalWrite(pinEna, HIGH);
+    sleep_mode = false;
+    delay(200);
+  }
+
+  // cambiamos el estado a on o off
   state = new_state;
   int led, angle;
   if (state) {        // true - prender
@@ -84,6 +100,7 @@ void setup() {
   Serial.begin(115200);
   delay(500);
   configurarSwitchbot();
+  digitalWrite(pinEna, HIGH);
 }
 void loop() {
   if (digitalRead(btn0)) {
@@ -94,6 +111,15 @@ void loop() {
       // cambiamos el estado
       cambiarEstado(!state);
     }
+  }
+  if (sleep_mode == false) {
+    if (counter <= TIME_TO_SLEEP) {
+      counter += 250;
+    } else {
+      digitalWrite(pinEna, LOW);
+      sleep_mode = true;
+    }
+    Serial.println(counter);
   }
   delay(250);
 }
